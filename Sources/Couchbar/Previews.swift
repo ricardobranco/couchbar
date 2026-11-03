@@ -1,7 +1,7 @@
 #if DEBUG
 import AppKit
 import SwiftUI
-import TVCompanionCore
+import CouchbarCore
 
 enum PreviewData {
     static let info = TVInfo(
@@ -46,7 +46,7 @@ enum PreviewData {
     }
 }
 
-/// `TVCompanion --render-previews <dir>` writes PNGs of the popup and Settings in light and dark mode.
+/// `Couchbar --render-previews <dir>` writes PNGs of the popup and Settings in light and dark mode.
 @MainActor
 enum PreviewRenderer {
     static func renderIfRequested() {

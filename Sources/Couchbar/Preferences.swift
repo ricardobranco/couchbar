@@ -1,6 +1,6 @@
 import Foundation
 import Observation
-import TVCompanionCore
+import CouchbarCore
 
 @Observable
 @MainActor

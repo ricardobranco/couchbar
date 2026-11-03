@@ -7,7 +7,7 @@ public struct RemoteIdentity: @unchecked Sendable {
     let identity: SecIdentity
     let certificate: SecCertificate
 
-    private static let password = "tvcompanion"
+    private static let password = "couchbar"
 
     public static func loadOrCreate(in directory: URL) async throws -> RemoteIdentity {
         let file = directory.appending(path: "identity.p12")
@@ -29,9 +29,9 @@ public struct RemoteIdentity: @unchecked Sendable {
         let openssl = URL(fileURLWithPath: "/usr/bin/openssl")
         for arguments in [
             ["req", "-x509", "-newkey", "rsa:2048", "-nodes", "-sha256", "-days", "3650",
-             "-subj", "/CN=TV Companion", "-keyout", key.path, "-out", certificate.path],
+             "-subj", "/CN=Couchbar", "-keyout", key.path, "-out", certificate.path],
             ["pkcs12", "-export", "-inkey", key.path, "-in", certificate.path, "-out", file.path,
-             "-name", "TV Companion", "-passout", "pass:\(password)"],
+             "-name", "Couchbar", "-passout", "pass:\(password)"],
         ] {
             let result = try await Shell.run(openssl, arguments, timeout: 30)
             guard result.succeeded else { throw RemoteError.certificate(result.stderr) }

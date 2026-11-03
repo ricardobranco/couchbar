@@ -1,6 +1,6 @@
 import Foundation
 import Testing
-@testable import TVCompanionCore
+@testable import CouchbarCore
 
 struct ProtobufTests {
     @Test func roundTrip() throws {
@@ -9,12 +9,12 @@ struct ProtobufTests {
         writer.varint(2, 200)
         writer.message(10) {
             $0.string(1, "atvremote")
-            $0.string(2, "TV Companion")
+            $0.string(2, "Couchbar")
         }
         let message = try ProtoMessage(writer.data)
         #expect(message.int(1) == 2)
         #expect(message.int(2) == 200)
-        #expect(message.message(10)?.string(2) == "TV Companion")
+        #expect(message.message(10)?.string(2) == "Couchbar")
         #expect(!message.has(11))
     }
 

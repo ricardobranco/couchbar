@@ -2,11 +2,11 @@
 import PackageDescription
 
 let package = Package(
-    name: "TVCompanion",
+    name: "Couchbar",
     platforms: [.macOS(.v14)],
     targets: [
-        .target(name: "TVCompanionCore"),
-        .executableTarget(name: "TVCompanion", dependencies: ["TVCompanionCore"]),
-        .testTarget(name: "TVCompanionCoreTests", dependencies: ["TVCompanionCore"]),
+        .target(name: "CouchbarCore"),
+        .executableTarget(name: "Couchbar", dependencies: ["CouchbarCore"]),
+        .testTarget(name: "CouchbarCoreTests", dependencies: ["CouchbarCore"]),
     ]
 )

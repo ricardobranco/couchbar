@@ -1,7 +1,7 @@
 import AppKit
 import Observation
 import os
-import TVCompanionCore
+import CouchbarCore
 
 @Observable
 @MainActor
@@ -39,7 +39,7 @@ final class TVController {
         didSet { if isPopupVisible && !oldValue { wakePolling() } }
     }
 
-    private let log = Logger(subsystem: "dev.ricardobranco.tvcompanion", category: "connection")
+    private let log = Logger(subsystem: "dev.ricardobranco.couchbar", category: "connection")
     private var client: TVClient?
     private var pollTask: Task<Void, Never>?
     private var pendingVolume: Int?
@@ -52,10 +52,10 @@ final class TVController {
     private var artworkTask: Task<Void, Never>?
 
     private static let artworkDirectory = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
-        .appending(path: "TV Companion/apps")
+        .appending(path: "Couchbar/apps")
 
     private static let remoteDirectory = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
-        .appending(path: "TV Companion/remote")
+        .appending(path: "Couchbar/remote")
 
     init(autoStart: Bool = true) {
         if autoStart { start() }
@@ -310,7 +310,7 @@ final class TVController {
         keyboardPairing = .starting
         Task {
             do {
-                let pairing = RemotePairing(host: host, identity: try await loadRemoteIdentity(), clientName: "TV Companion")
+                let pairing = RemotePairing(host: host, identity: try await loadRemoteIdentity(), clientName: "Couchbar")
                 self.pairing = pairing
                 try await pairing.start()
                 keyboardPairing = .waitingForCode

@@ -1,6 +1,6 @@
 import ServiceManagement
 import SwiftUI
-import TVCompanionCore
+import CouchbarCore
 
 struct SettingsView: View {
     var body: some View {

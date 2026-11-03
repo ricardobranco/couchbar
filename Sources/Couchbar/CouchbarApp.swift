@@ -1,7 +1,7 @@
 import SwiftUI
 
 @main
-struct TVCompanionApp: App {
+struct CouchbarApp: App {
     @State private var controller = TVController()
 
     init() {

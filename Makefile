@@ -10,11 +10,11 @@ app:
 	./scripts/build-app.sh
 
 run: app
-	open "build/TV Companion.app"
+	open "build/Couchbar.app"
 
 install: app
-	rm -rf "/Applications/TV Companion.app"
-	cp -R "build/TV Companion.app" /Applications/
+	rm -rf "/Applications/Couchbar.app"
+	cp -R "build/Couchbar.app" /Applications/
 
 clean:
 	rm -rf .build build

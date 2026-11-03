@@ -1,5 +1,5 @@
 import Testing
-@testable import TVCompanionCore
+@testable import CouchbarCore
 
 struct ParserTests {
     @Test func devicesListKeepsSerialStateAndModel() {

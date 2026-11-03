@@ -1,4 +1,4 @@
-# TV Companion
+# Couchbar
 
 A macOS menu bar app for an Android TV or Google TV. Turn the TV on and off, control volume and playback, type
 on the TV from the Mac keyboard, switch inputs, launch apps and mirror the TV screen to a Mac window, all from
@@ -64,8 +64,8 @@ The app looks for its tools here, and both paths can also be set in Settings:
 ## Build and install
 
 ```bash
-git clone https://github.com/ricardobranco/tv-companion.git
-cd tv-companion
+git clone https://github.com/ricardobranco/couchbar.git
+cd couchbar
 make install
 ```
 
@@ -73,7 +73,7 @@ make install
 |---|---|
 | `make build` | Debug build with SwiftPM |
 | `make test` | Unit tests |
-| `make app` | Builds a release `build/TV Companion.app` |
+| `make app` | Builds a release `build/Couchbar.app` |
 | `make run` | Builds the app and opens it |
 | `make install` | Builds the app and copies it to `/Applications` |
 | `make clean` | Removes the build folders |
@@ -105,7 +105,7 @@ asks again when it changes.
    adb pair 192.168.1.20:37000
    ```
 
-4. Open TV Companion. When macOS asks to let it find devices on your local network, select **Allow**. The TV is
+4. Open Couchbar. When macOS asks to let it find devices on your local network, select **Allow**. The TV is
    then found automatically and remembered by its serial number, even when its IP address changes.
 5. Optional: in Settings → Connection → Keyboard, select **Pair…** and enter the code shown on the TV.
 
@@ -113,20 +113,20 @@ asks again when it changes.
 
 | Problem | What to check |
 |---|---|
-| "No TV found" | Wireless debugging is on and the TV is on the same network as the Mac. In System Settings → Privacy & Security → Local Network, TV Companion is allowed. |
-| "No TV found" while Android Studio is open | All apps share one adb server, and macOS applies the Local Network permission of the app that started it. Quit Android Studio, run `adb kill-server`, and reopen TV Companion. Or allow Android Studio in Local Network too. |
+| "No TV found" | Wireless debugging is on and the TV is on the same network as the Mac. In System Settings → Privacy & Security → Local Network, Couchbar is allowed. |
+| "No TV found" while Android Studio is open | All apps share one adb server, and macOS applies the Local Network permission of the app that started it. Quit Android Studio, run `adb kill-server`, and reopen Couchbar. Or allow Android Studio in Local Network too. |
 | The mirror window is black | The TV is showing HDMI, Live TV or a DRM-protected app (see Mirroring limits above). |
 | The keyboard doesn't type | In Settings, unpair the keyboard and pair it again. |
-| scrcpy errors | `~/Library/Logs/TV Companion/scrcpy.log` |
+| scrcpy errors | `~/Library/Logs/Couchbar/scrcpy.log` |
 
 ## Your data
 
 | What | Where |
 |---|---|
-| Settings | The app's user defaults (`dev.ricardobranco.tvcompanion`) |
-| Keyboard pairing certificate | `~/Library/Application Support/TV Companion/remote` (Unpair deletes it) |
-| App names and banners read from the TV | `~/Library/Caches/TV Companion/apps` |
-| scrcpy log | `~/Library/Logs/TV Companion/scrcpy.log` |
+| Settings | The app's user defaults (`dev.ricardobranco.couchbar`) |
+| Keyboard pairing certificate | `~/Library/Application Support/Couchbar/remote` (Unpair deletes it) |
+| App names and banners read from the TV | `~/Library/Caches/Couchbar/apps` |
+| scrcpy log | `~/Library/Logs/Couchbar/scrcpy.log` |
 
 ## Development
 
@@ -135,22 +135,22 @@ Open `Package.swift` in Xcode for SwiftUI previews of the popup and Settings.
 | Task | Command |
 |---|---|
 | Read-only checks against a real TV | `TV_LIVE_TESTS=1 swift test --filter LiveTVTests` |
-| Re-render the images in this README | `swift build && .build/debug/TVCompanion --render-previews docs/previews --artwork ~/Library/Caches/TV\ Companion/apps` |
+| Re-render the images in this README | `swift build && .build/debug/Couchbar --render-previews docs/previews --artwork ~/Library/Caches/Couchbar/apps` |
 
-The images use the sample data in `Sources/TVCompanion/Previews.swift`, not a live TV. `--artwork` adds the app banners the app has cached from your TV; leave it
+The images use the sample data in `Sources/Couchbar/Previews.swift`, not a live TV. `--artwork` adds the app banners the app has cached from your TV; leave it
 out to show symbols instead.
 
 | Path | Contents |
 |---|---|
-| `Sources/TVCompanionCore` | adb process runner, device discovery, TV client, dumpsys parsers, app artwork, scrcpy arguments, Wake-on-LAN |
-| `Sources/TVCompanionCore/Remote` | Android TV Remote protocol v2: TLS client certificate, pairing, keyboard session, protobuf encoding |
-| `Sources/TVCompanion` | SwiftUI menu bar app: controller, scrcpy session, popup and Settings views |
-| `Tests/TVCompanionCoreTests` | Parser and protocol tests from real TV output, opt-in live TV tests |
+| `Sources/CouchbarCore` | adb process runner, device discovery, TV client, dumpsys parsers, app artwork, scrcpy arguments, Wake-on-LAN |
+| `Sources/CouchbarCore/Remote` | Android TV Remote protocol v2: TLS client certificate, pairing, keyboard session, protobuf encoding |
+| `Sources/Couchbar` | SwiftUI menu bar app: controller, scrcpy session, popup and Settings views |
+| `Tests/CouchbarCoreTests` | Parser and protocol tests from real TV output, opt-in live TV tests |
 | `Support/Info.plist` | Bundle metadata (`LSUIElement`: menu bar only, no Dock icon) |
 
 ## Credits
 
-TV Companion runs these tools as separate programs; it doesn't include their code.
+Couchbar runs these tools as separate programs; it doesn't include their code.
 
 | Project | Used for | License |
 |---|---|---|
@@ -172,5 +172,5 @@ Icons are [SF Symbols](https://developer.apple.com/sf-symbols/) by Apple.
 
 [MIT](LICENSE) © 2026 Ricardo Branco
 
-TV Companion is not affiliated with or endorsed by Google, TCL or Genymobile. Android, Android TV and Google TV are
+Couchbar is not affiliated with or endorsed by Google, TCL or Genymobile. Android, Android TV and Google TV are
 trademarks of Google LLC. Other product names are trademarks of their owners.

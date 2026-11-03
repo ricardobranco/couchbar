@@ -58,7 +58,7 @@ public struct AppArtworkLoader: Sendable {
     }
 
     private func extract(_ package: String, apkPath: String) async throws -> AppArtwork {
-        let work = FileManager.default.temporaryDirectory.appending(path: "tvcompanion-\(UUID().uuidString)")
+        let work = FileManager.default.temporaryDirectory.appending(path: "couchbar-\(UUID().uuidString)")
         try FileManager.default.createDirectory(at: work, withIntermediateDirectories: true)
         defer { try? FileManager.default.removeItem(at: work) }
 

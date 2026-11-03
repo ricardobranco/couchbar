@@ -1,5 +1,5 @@
 import SwiftUI
-import TVCompanionCore
+import CouchbarCore
 
 struct RemotePad: View {
     @Environment(TVController.self) private var controller

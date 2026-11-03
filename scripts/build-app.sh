@@ -1,19 +1,19 @@
 #!/bin/zsh
-# Builds "TV Companion.app" into build/. Signs with the Apple Development identity of TEAM_ID
+# Builds "Couchbar.app" into build/. Signs with the Apple Development identity of TEAM_ID
 # (or SIGN_IDENTITY), falling back to an ad-hoc signature.
 set -euo pipefail
 
 cd "${0:A:h}/.."
 CONFIGURATION="${CONFIGURATION:-release}"
 TEAM_ID="${TEAM_ID:-KB29RSZ4EN}"
-APP="build/TV Companion.app"
+APP="build/Couchbar.app"
 
 swift build -c "$CONFIGURATION"
 BIN_DIR="$(swift build -c "$CONFIGURATION" --show-bin-path)"
 
 rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
-cp "$BIN_DIR/TVCompanion" "$APP/Contents/MacOS/TVCompanion"
+cp "$BIN_DIR/Couchbar" "$APP/Contents/MacOS/Couchbar"
 cp Support/Info.plist "$APP/Contents/Info.plist"
 [[ -f Support/AppIcon.icns ]] && cp Support/AppIcon.icns "$APP/Contents/Resources/AppIcon.icns"
 

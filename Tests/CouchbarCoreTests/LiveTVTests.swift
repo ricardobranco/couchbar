@@ -1,6 +1,6 @@
 import Foundation
 import Testing
-@testable import TVCompanionCore
+@testable import CouchbarCore
 
 // Read-only checks against a real TV on the network: `TV_LIVE_TESTS=1 swift test --filter LiveTVTests`.
 @Suite(.enabled(if: ProcessInfo.processInfo.environment["TV_LIVE_TESTS"] == "1"))
@@ -27,7 +27,7 @@ struct LiveTVTests {
     @Test func readsAppArtwork() async throws {
         let adb = try #require(ADB.locate())
         let serial = try #require(try await DeviceResolver(adb: adb).resolve(serialNumber: nil, manualAddress: nil))
-        let directory = FileManager.default.temporaryDirectory.appending(path: "tvcompanion-artwork-test")
+        let directory = FileManager.default.temporaryDirectory.appending(path: "couchbar-artwork-test")
         try? FileManager.default.removeItem(at: directory)
         let packages = ProcessInfo.processInfo.environment["TV_ARTWORK_PACKAGES"]?.split(separator: ",").map(String.init)
             ?? ["com.netflix.ninja", "com.spotify.tv.android"]

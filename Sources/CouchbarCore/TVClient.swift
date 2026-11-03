@@ -53,7 +53,7 @@ public struct TVClient: Sendable {
         return result.stdout
     }
 
-    private static let separator = "@@TVCOMPANION@@"
+    private static let separator = "@@COUCHBAR@@"
 
     public func info() async throws -> TVInfo {
         let sections = try await shell([

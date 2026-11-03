@@ -5,15 +5,15 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-	<string>TV Companion</string>
+	<string>Couchbar</string>
 	<key>CFBundleExecutable</key>
-	<string>TVCompanion</string>
+	<string>Couchbar</string>
 	<key>CFBundleIdentifier</key>
-	<string>dev.ricardobranco.tvcompanion</string>
+	<string>dev.ricardobranco.couchbar</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>TV Companion</string>
+	<string>Couchbar</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>

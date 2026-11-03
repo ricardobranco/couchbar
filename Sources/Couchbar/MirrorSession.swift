@@ -1,6 +1,6 @@
 import AppKit
 import Observation
-import TVCompanionCore
+import CouchbarCore
 
 @Observable
 @MainActor
@@ -10,7 +10,7 @@ final class MirrorSession {
     private var process: Process?
 
     static let logURL = FileManager.default.urls(for: .libraryDirectory, in: .userDomainMask)[0]
-        .appending(path: "Logs/TV Companion/scrcpy.log")
+        .appending(path: "Logs/Couchbar/scrcpy.log")
 
     init() {
         // scrcpy is a separate process and would outlive the app, leaving a mirror window nothing controls.
