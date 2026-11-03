@@ -1,4 +1,4 @@
-import Foundation
+import AppKit
 import Observation
 import TVCompanionCore
 
@@ -11,6 +11,15 @@ final class MirrorSession {
 
     static let logURL = FileManager.default.urls(for: .libraryDirectory, in: .userDomainMask)[0]
         .appending(path: "Logs/TV Companion/scrcpy.log")
+
+    init() {
+        // scrcpy is a separate process and would outlive the app, leaving a mirror window nothing controls.
+        NotificationCenter.default.addObserver(forName: NSApplication.willTerminateNotification, object: nil, queue: .main) { [weak self] _ in
+            MainActor.assumeIsolated {
+                if let process = self?.process, process.isRunning { kill(process.processIdentifier, SIGKILL) }
+            }
+        }
+    }
 
     func start(scrcpy: URL, adb: ADB, serial: String, title: String, options: MirrorOptions) {
         guard process == nil else { return }
@@ -50,8 +59,15 @@ final class MirrorSession {
     }
     #endif
 
+    // scrcpy's SDL loop only notices SIGTERM on its next window event, so an idle mirror window can
+    // ignore it indefinitely; it gets a moment to exit cleanly and is then killed.
     func stop() {
-        process?.terminate()
+        guard let process else { return }
+        process.terminate()
+        Task {
+            try? await Task.sleep(for: .seconds(1))
+            if process.isRunning { kill(process.processIdentifier, SIGKILL) }
+        }
     }
 
     private func finished(status: Int32, reason: Process.TerminationReason) {
