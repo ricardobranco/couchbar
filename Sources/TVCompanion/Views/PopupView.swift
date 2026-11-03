@@ -352,29 +352,63 @@ private struct AppsGrid: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             SectionTitle("Apps")
-            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 6), count: 4), spacing: 6) {
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 3), spacing: 8) {
                 ForEach(controller.favoriteApps) { app in
                     Button {
                         controller.launch(app)
                     } label: {
-                        VStack(spacing: 4) {
-                            Image(symbol: app.symbol)
-                                .font(.title3)
-                                .frame(height: 22)
-                            Text(app.name)
-                                .font(.caption2)
-                                .lineLimit(1)
-                        }
-                        .frame(maxWidth: .infinity, minHeight: 50)
-                        .background(
-                            controller.status.foregroundPackage == app.package ? AnyShapeStyle(Color.accentColor.opacity(0.2)) : AnyShapeStyle(.quinary),
-                            in: RoundedRectangle(cornerRadius: 8)
-                        )
-                        .contentShape(RoundedRectangle(cornerRadius: 8))
+                        AppTile(app: app, isCurrent: controller.status.foregroundPackage == app.package)
                     }
                     .buttonStyle(.plain)
+                    .help(controller.name(for: app))
                 }
             }
+        }
+    }
+}
+
+struct AppTile: View {
+    @Environment(TVController.self) private var controller
+    let app: TVApp
+    var isCurrent = false
+
+    var body: some View {
+        let shape = RoundedRectangle(cornerRadius: 8)
+        content
+            .frame(maxWidth: .infinity)
+            .aspectRatio(16 / 9, contentMode: .fit)
+            .clipShape(shape)
+            .contentShape(shape)
+            .overlay {
+                shape.strokeBorder(isCurrent ? Color.accentColor : Color.primary.opacity(0.08), lineWidth: isCurrent ? 2 : 1)
+            }
+    }
+
+    @ViewBuilder
+    private var content: some View {
+        if let image = controller.appImages[app.package], controller.appArtwork[app.package]?.isBanner == true {
+            Image(nsImage: image)
+                .resizable()
+                .scaledToFill()
+        } else {
+            VStack(spacing: 4) {
+                if let image = controller.appImages[app.package] {
+                    Image(nsImage: image)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(height: 24)
+                } else {
+                    Image(symbol: app.symbol)
+                        .font(.title3)
+                        .frame(height: 24)
+                }
+                Text(controller.name(for: app))
+                    .font(.caption2)
+                    .lineLimit(1)
+                    .padding(.horizontal, 4)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(.quinary)
         }
     }
 }

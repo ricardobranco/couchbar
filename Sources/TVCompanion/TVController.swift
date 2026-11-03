@@ -20,6 +20,8 @@ final class TVController {
     private(set) var status = TVStatus()
     private(set) var lastError: String?
     private(set) var mirrorPreview: NSImage?
+    private(set) var appArtwork: [String: AppArtwork] = [:]
+    private(set) var appImages: [String: NSImage] = [:]
     var isPopupVisible = false {
         didSet { if isPopupVisible && !oldValue { wakePolling() } }
     }
@@ -28,18 +30,31 @@ final class TVController {
     private var client: TVClient?
     private var pollTask: Task<Void, Never>?
     private var pendingVolume: Int?
+    private var artworkTask: Task<Void, Never>?
+
+    private static let artworkDirectory = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
+        .appending(path: "TV Companion/apps")
 
     init(autoStart: Bool = true) {
         if autoStart { start() }
     }
 
     #if DEBUG
+    static var previewArtworkDirectory: URL?
+
     static func preview(connection: Connection = .connected, info: TVInfo?, status: TVStatus = TVStatus(), mirroring: Bool = false, mirrorPreview: NSImage? = nil, error: String? = nil) -> TVController {
         let controller = TVController(autoStart: false)
         controller.connection = connection
         controller.info = info
         controller.status = status
         controller.lastError = error
+        let directory = previewArtworkDirectory
+        for file in directory.flatMap({ try? FileManager.default.contentsOfDirectory(atPath: $0.path) }) ?? [] where file.hasSuffix(".json") {
+            if let directory, let data = try? Data(contentsOf: directory.appending(path: file)),
+               let artwork = try? JSONDecoder().decode(AppArtwork.self, from: data) {
+                controller.apply(artwork, for: String(file.dropLast(5)), from: directory)
+            }
+        }
         if mirroring { controller.mirror.simulateRunning() }
         controller.mirrorPreview = mirrorPreview
         return controller
@@ -122,11 +137,33 @@ final class TVController {
             preferences.serialNumber = info.serialNumber
             if let mac = info.macAddress { preferences.macAddress = mac }
             connection = .connected
+            loadArtwork(client: client, apps: info.apps)
             log.info("Connected to \(info.name, privacy: .public) as \(serial, privacy: .public)")
         } catch {
             log.error("Connection failed: \(error.localizedDescription, privacy: .public)")
             connection = .unavailable(error.localizedDescription)
         }
+    }
+
+    func name(for app: TVApp) -> String {
+        appArtwork[app.package]?.label ?? app.name
+    }
+
+    private func loadArtwork(client: TVClient, apps: [TVApp]) {
+        guard let loader = AppArtworkLoader(adb: client.adb, serial: client.serial, cacheDirectory: Self.artworkDirectory) else { return }
+        let favorites = Set(preferences.favoriteApps)
+        let packages = apps.map(\.package).sorted { favorites.contains($0) && !favorites.contains($1) }
+        artworkTask?.cancel()
+        artworkTask = Task.detached { [weak self] in
+            await loader.load(packages) { [weak self] package, artwork in
+                await self?.apply(artwork, for: package)
+            }
+        }
+    }
+
+    private func apply(_ artwork: AppArtwork, for package: String, from directory: URL = artworkDirectory) {
+        appArtwork[package] = artwork
+        appImages[package] = artwork.imageFile.flatMap { NSImage(contentsOf: directory.appending(path: $0)) }
     }
 
     // MARK: Actions

@@ -52,6 +52,9 @@ enum PreviewRenderer {
         let arguments = CommandLine.arguments
         guard let flag = arguments.firstIndex(of: "--render-previews"), arguments.indices.contains(flag + 1) else { return }
         let directory = URL(fileURLWithPath: arguments[flag + 1])
+        if let artwork = arguments.firstIndex(of: "--artwork"), arguments.indices.contains(artwork + 1) {
+            TVController.previewArtworkDirectory = URL(fileURLWithPath: arguments[artwork + 1])
+        }
         DispatchQueue.main.async {
             try? FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
             for scenario in PreviewData.scenarios {

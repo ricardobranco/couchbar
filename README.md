@@ -12,7 +12,7 @@ It talks to the TV over wireless ADB and mirrors the TV screen to the Mac with [
 
 | Where | What |
 |---|---|
-| Menu bar popup | Power (sleep / wake, Wake-on-LAN when offline), TV screen mirroring, TV screenshot to Desktop and clipboard, volume and mute, now playing with transport controls, D-pad remote with keyboard arrows, typing text on the TV, input switching (Live TV, HDMI 1–4), favorite app launcher |
+| Menu bar popup | Power (sleep / wake, Wake-on-LAN when offline), TV screen mirroring, TV screenshot to Desktop and clipboard, volume and mute, now playing with transport controls, D-pad remote with keyboard arrows, typing text on the TV, input switching (Live TV, HDMI 1–4), favorite apps with their own Android TV banners |
 | Mirror window | scrcpy window with the TV screen; the Mac keyboard and mouse control the TV, optional TV sound on the Mac |
 | Settings | Connection (auto-discovered or manual address), adb and scrcpy paths, mirroring quality, input names, favorite apps, launch at login |
 
@@ -26,6 +26,8 @@ hardware video planes or secure surfaces. The Google TV UI and regular apps mirr
 
 - macOS 14 or later, Apple silicon
 - Android platform-tools (`adb`) and scrcpy: `brew install scrcpy android-platform-tools`
+- Optional: Android SDK build-tools (`aapt2`), to read each app's name and banner from the TV. Without it apps
+  show a symbol.
 - The TV on the same network with Wireless debugging on (Settings → System → Developer options),
   paired once with `adb pair <ip>:<port>`. The TV is then found by mDNS and remembered by its serial number.
 

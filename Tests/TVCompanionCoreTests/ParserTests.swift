@@ -135,3 +135,22 @@ struct ParserTests {
         #expect(TVApp(package: "com.example.coolplayer.tv").name == "Coolplayer")
     }
 }
+
+struct BadgingTests {
+    @Test func bannerAndLargestIcon() {
+        let output = """
+        package: name='com.netflix.ninja' versionCode='27249'
+        application-label:'Netflix'
+        application-icon-160:'res/mipmap-mdpi-v4/ic_launcher.png'
+        application-icon-480:'res/mipmap-xxhdpi-v4/ic_launcher.png'
+        application-icon-65534:'res/mipmap-mdpi-v4/ic_launcher.png'
+        application: label='Netflix' icon='res/mipmap-mdpi-v4/ic_launcher.png' banner='res/mipmap-mdpi-v4/ic_banner.png'
+        """
+        #expect(Badging.parse(output) == Badging(label: "Netflix", banner: "res/mipmap-mdpi-v4/ic_banner.png", largestIcon: "res/mipmap-xxhdpi-v4/ic_launcher.png"))
+    }
+
+    @Test func noBannerNoIcon() {
+        #expect(Badging.parse("application: label='HBO Max' icon=''") == Badging(label: "HBO Max", banner: nil, largestIcon: nil))
+        #expect(Badging.parse("package: name='x'") == nil)
+    }
+}

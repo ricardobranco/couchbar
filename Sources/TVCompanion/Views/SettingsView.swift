@@ -138,7 +138,11 @@ private struct AppSettings: View {
                 Section {
                     ForEach(apps) { app in
                         Toggle(isOn: binding(for: app)) {
-                            Label(app.name, systemImage: app.symbol)
+                            HStack(spacing: 10) {
+                                AppTile(app: app)
+                                    .frame(width: 48)
+                                Text(controller.name(for: app))
+                            }
                         }
                     }
                 } footer: {
