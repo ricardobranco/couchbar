@@ -1,4 +1,10 @@
-# Couchbar
+<p align="center">
+  <img src="docs/icon.png" width="128" alt="Couchbar icon: a couch with a couchbar tray on its arm">
+</p>
+
+<h1 align="center">Couchbar</h1>
+
+<p align="center">Your Android TV or Google TV, from the Mac menu bar.</p>
 
 A macOS menu bar app for an Android TV or Google TV. Turn the TV on and off, control volume and playback, type
 on the TV from the Mac keyboard, switch inputs, launch apps and mirror the TV screen to a Mac window, all from
@@ -77,6 +83,7 @@ make install
 | `make run` | Builds the app and opens it |
 | `make install` | Builds the app and copies it to `/Applications` |
 | `make clean` | Removes the build folders |
+| `make icon` | Redraws the app icon from `scripts/make-icon.swift` into `Support/AppIcon.icns` and `docs/icon.png` |
 
 `scripts/build-app.sh` signs the app with an Apple Development certificate for the team in `TEAM_ID`. If no
 matching certificate is found, it signs ad hoc. Ad hoc works on your own Mac. To sign with your own team or a
@@ -146,7 +153,8 @@ out to show symbols instead.
 | `Sources/CouchbarCore/Remote` | Android TV Remote protocol v2: TLS client certificate, pairing, keyboard session, protobuf encoding |
 | `Sources/Couchbar` | SwiftUI menu bar app: controller, scrcpy session, popup and Settings views |
 | `Tests/CouchbarCoreTests` | Parser and protocol tests from real TV output, opt-in live TV tests |
-| `Support/Info.plist` | Bundle metadata (`LSUIElement`: menu bar only, no Dock icon) |
+| `Support` | Bundle metadata (`LSUIElement`: menu bar only, no Dock icon) and the app icon |
+| `scripts` | App bundle build and signing, icon drawing |
 
 ## Credits
 
@@ -166,7 +174,8 @@ references:
 | [androidtv-remote](https://github.com/louis49/androidtv-remote) by louis49 | Node.js client for protocol v2 |
 | [Aymkdn's protocol notes](https://github.com/Aymkdn/assistant-freebox-cloud/wiki/Google-TV-(aka-Android-TV)-Remote-Control-(v2)) | Description of the v2 messages |
 
-Icons are [SF Symbols](https://developer.apple.com/sf-symbols/) by Apple.
+Icons inside the app are [SF Symbols](https://developer.apple.com/sf-symbols/) by Apple. The app icon is drawn in code
+for this project and is covered by the MIT license.
 
 ## License
 
