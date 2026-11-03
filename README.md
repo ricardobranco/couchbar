@@ -6,6 +6,12 @@
 
 <p align="center">Your Android TV or Google TV, from the Mac menu bar.</p>
 
+<p align="center">
+  <a href="https://github.com/ricardobranco/couchbar/releases"><img src="https://img.shields.io/github/v/release/ricardobranco/couchbar?include_prereleases&label=download" alt="Download the latest release"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT license"></a>
+  <a href="https://paypal.me/ricardobranco92"><img src="https://img.shields.io/badge/support-%E2%9D%A4%20PayPal-ff5e8a" alt="Support Couchbar with PayPal"></a>
+</p>
+
 A macOS menu bar app for an Android TV or Google TV. Turn the TV on and off, control volume and playback, type
 on the TV from the Mac keyboard, switch inputs, launch apps and mirror the TV screen to a Mac window, all from
 the menu bar.
@@ -195,6 +201,10 @@ references:
 
 Icons inside the app are [SF Symbols](https://developer.apple.com/sf-symbols/) by Apple. The app icon is drawn in code
 for this project and is covered by the MIT license.
+
+## Support
+
+Couchbar is free. If it saves you a trip to the remote, you can [buy me a coffee with PayPal](https://paypal.me/ricardobranco92).
 
 ## License
 
