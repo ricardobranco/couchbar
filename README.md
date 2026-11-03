@@ -204,7 +204,7 @@ for this project and is covered by the MIT license.
 
 ## Support
 
-Couchbar is free. If it saves you a trip to the remote, you can [buy me a coffee with PayPal](https://paypal.me/ricardobranco92).
+Couchbar is free. If it saves you a trip to the remote, you can [buy me a coffee](https://paypal.me/ricardobranco92).
 
 ## License
 
