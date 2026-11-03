@@ -1,15 +1,17 @@
 #!/bin/zsh
 # Builds "Couchbar.app" into build/. Signs with the Apple Development identity of TEAM_ID
-# (or SIGN_IDENTITY), falling back to an ad-hoc signature.
+# (or SIGN_IDENTITY), falling back to an ad-hoc signature. ARCHS="arm64 x86_64" builds a universal app.
 set -euo pipefail
 
 cd "${0:A:h}/.."
 CONFIGURATION="${CONFIGURATION:-release}"
 TEAM_ID="${TEAM_ID:-KB29RSZ4EN}"
 APP="build/Couchbar.app"
+ARCH_FLAGS=()
+for arch in ${=ARCHS:-}; do ARCH_FLAGS+=(--arch "$arch"); done
 
-swift build -c "$CONFIGURATION"
-BIN_DIR="$(swift build -c "$CONFIGURATION" --show-bin-path)"
+swift build -c "$CONFIGURATION" "${ARCH_FLAGS[@]}"
+BIN_DIR="$(swift build -c "$CONFIGURATION" "${ARCH_FLAGS[@]}" --show-bin-path)"
 
 rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"

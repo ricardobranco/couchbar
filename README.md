@@ -67,7 +67,19 @@ The app looks for its tools here, and both paths can also be set in Settings:
 | scrcpy | `/opt/homebrew/bin`, `/usr/local/bin` |
 | aapt2 | The newest `build-tools/<version>` in the SDK next to adb, `$ANDROID_HOME`, `$ANDROID_SDK_ROOT` or `~/Library/Android/sdk` |
 
-## Build and install
+## Install
+
+Couchbar is in alpha. Download the latest `Couchbar-<version>.zip` from
+[Releases](https://github.com/ricardobranco/couchbar/releases), unzip it and move Couchbar to Applications.
+
+The alpha isn't notarized by Apple yet, so macOS blocks it the first time you open it. To allow it, open System
+Settings → Privacy & Security, scroll down to the message about Couchbar, select **Open Anyway** and confirm. You
+only need to do this once.
+
+Then install the tools it uses, `brew install android-platform-tools scrcpy`, and follow
+[Set up the TV](#set-up-the-tv).
+
+## Build from source
 
 ```bash
 git clone https://github.com/ricardobranco/couchbar.git
@@ -82,6 +94,7 @@ make install
 | `make app` | Builds a release `build/Couchbar.app` |
 | `make run` | Builds the app and opens it |
 | `make install` | Builds the app and copies it to `/Applications` |
+| `make release` | Builds a universal (Apple silicon and Intel) app and zips it into `dist/` |
 | `make clean` | Removes the build folders |
 | `make icon` | Redraws the app icon from `scripts/make-icon.swift` into `Support/AppIcon.icns` and `docs/icon.png` |
 
