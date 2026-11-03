@@ -3,12 +3,14 @@ import Foundation
 public struct TVStatus: Sendable, Equatable {
     public var power: PowerState?
     public var volume: VolumeLevel?
+    public var volumeControl: VolumeControl
     public var foregroundPackage: String?
     public var nowPlaying: NowPlaying?
 
-    public init(power: PowerState? = nil, volume: VolumeLevel? = nil, foregroundPackage: String? = nil, nowPlaying: NowPlaying? = nil) {
+    public init(power: PowerState? = nil, volume: VolumeLevel? = nil, volumeControl: VolumeControl = .absolute, foregroundPackage: String? = nil, nowPlaying: NowPlaying? = nil) {
         self.power = power
         self.volume = volume
+        self.volumeControl = volumeControl
         self.foregroundPackage = foregroundPackage
         self.nowPlaying = nowPlaying
     }
@@ -79,13 +81,15 @@ public struct TVClient: Sendable {
             "cmd media_session volume --stream 3 --get",
             "dumpsys window | grep mCurrentFocus=",
             "dumpsys media_session",
+            "dumpsys hdmi_control | grep -E 'mSystemAudioActivated|mIsAbsoluteVolumeBehaviorEnabled'",
         ].joined(separator: "; echo \(Self.separator); "))
             .components(separatedBy: Self.separator)
-        guard sections.count == 4 else { throw ADBError.commandFailed("Unexpected answer from the TV.") }
+        guard sections.count == 5 else { throw ADBError.commandFailed("Unexpected answer from the TV.") }
 
         return TVStatus(
             power: PowerState.parse(sections[0]),
             volume: VolumeLevel.parse(sections[1]),
+            volumeControl: VolumeControl.parse(sections[4]),
             foregroundPackage: ForegroundApp.parse(sections[2]),
             nowPlaying: NowPlaying.parse(sections[3])
         )
@@ -100,10 +104,8 @@ public struct TVClient: Sendable {
         try await press([key])
     }
 
-    // Steps with key presses instead of `media_session volume --set`: with an ARC soundbar the keys
-    // go out over CEC, while --set only changes the TV's own level.
-    public func stepVolume(by delta: Int) async throws {
-        try await press(Array(repeating: delta > 0 ? .volumeUp : .volumeDown, count: abs(delta)))
+    public func setVolume(_ level: Int) async throws {
+        try await shell("cmd media_session volume --stream 3 --set \(level)")
     }
 
     public func launch(_ package: String) async throws {

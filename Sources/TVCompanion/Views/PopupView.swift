@@ -146,7 +146,17 @@ private struct VolumeRow: View {
             .buttonStyle(.borderless)
             .help("Mute")
 
-            if let volume = controller.status.volume {
+            if controller.status.volumeControl == .stepped {
+                Text("Volume")
+                    .foregroundStyle(.secondary)
+                Spacer()
+                if let volume = controller.status.volume {
+                    Text("\(volume.current)")
+                        .font(.title3.monospacedDigit().weight(.medium))
+                        .contentTransition(.numericText(value: Double(volume.current)))
+                        .animation(.default, value: volume.current)
+                }
+            } else if let volume = controller.status.volume {
                 Slider(
                     value: Binding(
                         get: { Double(controller.displayedVolume ?? volume.current) },
@@ -165,18 +175,36 @@ private struct VolumeRow: View {
                 Spacer()
             }
 
-            Button {
-                controller.press(.volumeDown)
-            } label: {
-                Image(systemName: "minus")
+            if controller.status.volumeControl == .stepped {
+                ControlGroup {
+                    Button {
+                        controller.stepVolume(up: false)
+                    } label: {
+                        Image(systemName: "minus")
+                    }
+                    Button {
+                        controller.stepVolume(up: true)
+                    } label: {
+                        Image(systemName: "plus")
+                    }
+                }
+                .controlSize(.large)
+                .frame(width: 96)
+                .help("The sound system only takes volume steps")
+            } else {
+                Button {
+                    controller.stepVolume(up: false)
+                } label: {
+                    Image(systemName: "minus")
+                }
+                .buttonStyle(.borderless)
+                Button {
+                    controller.stepVolume(up: true)
+                } label: {
+                    Image(systemName: "plus")
+                }
+                .buttonStyle(.borderless)
             }
-            .buttonStyle(.borderless)
-            Button {
-                controller.press(.volumeUp)
-            } label: {
-                Image(systemName: "plus")
-            }
-            .buttonStyle(.borderless)
         }
     }
 }

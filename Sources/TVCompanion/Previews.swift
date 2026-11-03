@@ -21,6 +21,7 @@ enum PreviewData {
     static let playing = TVStatus(
         power: .awake,
         volume: VolumeLevel(current: 15, range: 0...100),
+        volumeControl: .stepped,
         foregroundPackage: "com.spotify.tv.android",
         nowPlaying: NowPlaying(package: "com.spotify.tv.android", title: "Take It Or Leave It", artist: "The Strokes", isPlaying: true)
     )

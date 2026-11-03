@@ -37,6 +37,13 @@ struct ParserTests {
         #expect(VolumeLevel.parse("Error: no service") == nil)
     }
 
+    @Test func volumeControl() {
+        #expect(VolumeControl.parse("mIsAbsoluteVolumeBehaviorEnabled: false\n  mSystemAudioActivated: true\n") == .stepped)
+        #expect(VolumeControl.parse("mIsAbsoluteVolumeBehaviorEnabled: true\n  mSystemAudioActivated: true\n") == .absolute)
+        #expect(VolumeControl.parse("mIsAbsoluteVolumeBehaviorEnabled: false\n  mSystemAudioActivated: false\n") == .absolute)
+        #expect(VolumeControl.parse("Can't find service: hdmi_control") == .absolute)
+    }
+
     @Test func powerAndForegroundApp() {
         #expect(PowerState.parse("  mWakefulness=Awake\n") == .awake)
         #expect(PowerState.parse("  mWakefulness=Asleep\n")?.isOn == false)

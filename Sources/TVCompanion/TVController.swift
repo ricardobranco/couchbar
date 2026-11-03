@@ -134,13 +134,23 @@ final class TVController {
     }
 
     func setVolume(_ target: Int) {
-        guard let current = status.volume?.current, target != current else { return }
+        guard target != status.volume?.current else {
+            pendingVolume = nil
+            return
+        }
         pendingVolume = target
         perform { client in
-            try await client.stepVolume(by: target - current)
-            try? await Task.sleep(for: .milliseconds(300))
+            try await client.setVolume(target)
             await self.refreshStatus()
             self.pendingVolume = nil
+        }
+    }
+
+    func stepVolume(up: Bool) {
+        perform { client in
+            try await client.press(up ? .volumeUp : .volumeDown)
+            try? await Task.sleep(for: .milliseconds(300))
+            await self.refreshStatus()
         }
     }
 

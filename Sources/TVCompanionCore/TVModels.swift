@@ -43,6 +43,19 @@ public struct VolumeLevel: Sendable, Equatable {
     }
 }
 
+public enum VolumeControl: Sendable, Equatable {
+    case absolute
+    case stepped
+
+    // A CEC audio system without absolute volume behaviour only takes <User Control Pressed> volume
+    // keys, so Android can show its reported level but cannot set it.
+    public static func parse(_ hdmiControl: String) -> VolumeControl {
+        let systemAudio = hdmiControl.contains("mSystemAudioActivated: true")
+        let absoluteBehavior = hdmiControl.contains("mIsAbsoluteVolumeBehaviorEnabled: true")
+        return systemAudio && !absoluteBehavior ? .stepped : .absolute
+    }
+}
+
 public enum PowerState: String, Sendable {
     case awake = "Awake"
     case asleep = "Asleep"

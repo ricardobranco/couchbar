@@ -12,11 +12,12 @@ It talks to the TV over wireless ADB and mirrors the TV screen to the Mac with [
 
 | Where | What |
 |---|---|
-| Menu bar popup | Power (sleep / wake, Wake-on-LAN when offline), TV screen mirroring, TV screenshot to Desktop and clipboard, volume slider and mute, now playing with transport controls, D-pad remote with keyboard arrows, typing text on the TV, input switching (Live TV, HDMI 1–4), favorite app launcher |
+| Menu bar popup | Power (sleep / wake, Wake-on-LAN when offline), TV screen mirroring, TV screenshot to Desktop and clipboard, volume and mute, now playing with transport controls, D-pad remote with keyboard arrows, typing text on the TV, input switching (Live TV, HDMI 1–4), favorite app launcher |
 | Mirror window | scrcpy window with the TV screen; the Mac keyboard and mouse control the TV, optional TV sound on the Mac |
 | Settings | Connection (auto-discovered or manual address), adb and scrcpy paths, mirroring quality, input names, favorite apps, launch at login |
 
-Volume uses key presses rather than setting a level, so with an ARC soundbar the change goes out over HDMI-CEC.
+Volume is a slider when the TV can set an exact level: its own speakers, or a soundbar with CEC absolute volume.
+A soundbar that only takes CEC volume keys gets − / + buttons and the level it reports.
 
 HDMI inputs, Live TV and DRM-protected apps (Netflix and similar) mirror as black: Android can't capture
 hardware video planes or secure surfaces. The Google TV UI and regular apps mirror normally.
