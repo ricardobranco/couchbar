@@ -49,6 +49,7 @@ private struct ConnectionSettings: View {
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
+            KeyboardPairingSection()
             Section {
                 TextField("adb", text: $preferences.adbPath, prompt: Text(ADB.locate()?.executable.path ?? "Not found"))
                 TextField("scrcpy", text: $preferences.scrcpyPath, prompt: Text(Scrcpy.locate()?.path ?? "Not found"))
@@ -67,6 +68,106 @@ private struct ConnectionSettings: View {
             }
         }
         .formStyle(.grouped)
+    }
+}
+
+private struct KeyboardPairingSection: View {
+    @Environment(TVController.self) private var controller
+
+    var body: some View {
+        Section {
+            LabeledContent("Keyboard") {
+                if controller.preferences.keyboardPaired {
+                    HStack {
+                        Text(controller.isKeyboardConnected ? "Connected" : "Paired")
+                            .foregroundStyle(.secondary)
+                        Button("Unpair") { controller.unpairKeyboard() }
+                    }
+                } else if controller.keyboardPairing == .starting {
+                    ProgressView().controlSize(.small)
+                } else {
+                    Button("Pair…") { controller.startKeyboardPairing() }
+                        .disabled(!controller.isConnected || controller.keyboardPairing != .idle)
+                }
+            }
+            if controller.keyboardPairing == .idle, let error = controller.keyboardError {
+                Text(error)
+                    .font(.caption)
+                    .foregroundStyle(.red)
+            }
+        } footer: {
+            Text("Pairing works like the Google Home app: the TV shows a code to enter here. Typing in the popup then follows the text field selected on the TV, with any characters.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .sheet(isPresented: Binding(
+            get: { controller.keyboardPairing == .waitingForCode || controller.keyboardPairing == .finishing },
+            set: { if !$0 { controller.cancelKeyboardPairing() } }
+        )) {
+            PairingCodeSheet()
+        }
+    }
+}
+
+struct PairingCodeSheet: View {
+    @Environment(TVController.self) private var controller
+    @State private var code = ""
+    @FocusState private var focused: Bool
+
+    var body: some View {
+        VStack(spacing: 14) {
+            Image(systemName: "tv.and.mediabox")
+                .font(.system(size: 34))
+                .foregroundStyle(Color.accentColor)
+            Text("Enter the code shown on the TV")
+                .font(.headline)
+            Text("\(controller.tvName) is showing a six-character pairing code.")
+                .font(.callout)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+            TextField("", text: $code, prompt: Text("000000"))
+                .font(.system(size: 28, weight: .medium, design: .monospaced))
+                .multilineTextAlignment(.center)
+                .textFieldStyle(.plain)
+                .padding(.vertical, 8)
+                .frame(width: 180)
+                .background(.quinary, in: RoundedRectangle(cornerRadius: 8))
+                .focused($focused)
+                .onChange(of: code) { _, new in
+                    let cleaned = String(new.uppercased().filter(\.isHexDigit).prefix(6))
+                    if cleaned != new { code = cleaned }
+                }
+                .onSubmit(pair)
+            if let error = controller.keyboardError {
+                Text(error)
+                    .font(.caption)
+                    .foregroundStyle(.red)
+                    .multilineTextAlignment(.center)
+            }
+            HStack {
+                Button("Cancel", role: .cancel) { controller.cancelKeyboardPairing() }
+                    .keyboardShortcut(.cancelAction)
+                Spacer()
+                if controller.keyboardPairing == .finishing {
+                    ProgressView().controlSize(.small)
+                }
+                Button("Pair", action: pair)
+                    .keyboardShortcut(.defaultAction)
+                    .disabled(code.count != 6 || controller.keyboardPairing == .finishing)
+            }
+        }
+        .padding(24)
+        .frame(width: 340)
+        .onAppear {
+            focused = true
+            NSApp.activate()
+        }
+    }
+
+    private func pair() {
+        guard code.count == 6 else { return }
+        controller.finishKeyboardPairing(code: code)
     }
 }
 

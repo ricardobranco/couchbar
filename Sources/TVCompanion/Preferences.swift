@@ -15,6 +15,7 @@ final class Preferences {
     var favoriteApps: [String] { didSet { defaults.set(favoriteApps, forKey: "favoriteApps") } }
     var inputNames: [String: String] { didSet { defaults.set(inputNames, forKey: "inputNames") } }
     var mirror: MirrorOptions { didSet { saveMirror() } }
+    var keyboardPaired: Bool { didSet { defaults.set(keyboardPaired, forKey: "keyboardPaired") } }
 
     init() {
         serialNumber = defaults.string(forKey: "serialNumber")
@@ -24,6 +25,7 @@ final class Preferences {
         scrcpyPath = defaults.string(forKey: "scrcpyPath") ?? ""
         favoriteApps = defaults.stringArray(forKey: "favoriteApps") ?? TVApp.defaultFavorites
         inputNames = defaults.dictionary(forKey: "inputNames") as? [String: String] ?? [:]
+        keyboardPaired = defaults.bool(forKey: "keyboardPaired")
 
         var mirror = MirrorOptions()
         if defaults.object(forKey: "mirror.maxSize") != nil {

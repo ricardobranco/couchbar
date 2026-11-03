@@ -3,7 +3,6 @@ import TVCompanionCore
 
 struct RemotePad: View {
     @Environment(TVController.self) private var controller
-    @State private var text = ""
     @FocusState private var padFocused: Bool
 
     var body: some View {
@@ -37,15 +36,7 @@ struct RemotePad: View {
             }
             .frame(maxWidth: .infinity)
 
-            HStack(spacing: 6) {
-                TextField("Type on the TV…", text: $text)
-                    .textFieldStyle(.roundedBorder)
-                    .onSubmit(send)
-                Button(action: send) {
-                    Image(systemName: "paperplane.fill")
-                }
-                .disabled(text.isEmpty)
-            }
+            TVKeyboardField()
         }
     }
 
@@ -100,11 +91,6 @@ struct RemotePad: View {
         guard let key else { return .ignored }
         controller.press(key)
         return .handled
-    }
-
-    private func send() {
-        controller.sendText(text)
-        text = ""
     }
 }
 

@@ -172,6 +172,13 @@ public struct NowPlaying: Sendable, Equatable {
     }
 }
 
+public enum IPAddress {
+    // `ip -o -4 addr`: only the connected interface has an address.
+    public static func parse(_ output: String) -> String? {
+        output.firstMatch(of: /\d+: (?:eth0|wlan0)\s+inet (\d+\.\d+\.\d+\.\d+)\//).map { String($0.1) }
+    }
+}
+
 public enum MACAddress {
     // `ip -o link`: prefers the interface that is up, so a Wi-Fi TV doesn't get its idle Ethernet MAC.
     public static func parse(_ output: String) -> String? {

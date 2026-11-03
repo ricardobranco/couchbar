@@ -12,6 +12,15 @@ final class TVController {
         case unavailable(String)
     }
 
+    typealias TextField = RemoteSession.TextField
+
+    enum KeyboardPairing: Equatable {
+        case idle
+        case starting
+        case waitingForCode
+        case finishing
+    }
+
     let preferences = Preferences()
     let mirror = MirrorSession()
 
@@ -20,6 +29,10 @@ final class TVController {
     private(set) var status = TVStatus()
     private(set) var lastError: String?
     private(set) var mirrorPreview: NSImage?
+    private(set) var tvTextField: TextField?
+    private(set) var keyboardPairing: KeyboardPairing = .idle
+    private(set) var keyboardError: String?
+    private(set) var remote: RemoteSession?
     private(set) var appArtwork: [String: AppArtwork] = [:]
     private(set) var appImages: [String: NSImage] = [:]
     var isPopupVisible = false {
@@ -30,10 +43,19 @@ final class TVController {
     private var client: TVClient?
     private var pollTask: Task<Void, Never>?
     private var pendingVolume: Int?
+    private var remoteIdentity: RemoteIdentity?
+    private var pairing: RemotePairing?
+    private var isConnectingRemote = false
+    // A certificate the TV already trusts (paired earlier, or the setting was lost) connects without
+    // pairing again, so the first connection is always tried once.
+    private var hasProbedKeyboard = false
     private var artworkTask: Task<Void, Never>?
 
     private static let artworkDirectory = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
         .appending(path: "TV Companion/apps")
+
+    private static let remoteDirectory = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+        .appending(path: "TV Companion/remote")
 
     init(autoStart: Bool = true) {
         if autoStart { start() }
@@ -64,6 +86,7 @@ final class TVController {
     var tvName: String { info?.name ?? "TV" }
     var isConnected: Bool { connection == .connected }
     var isOn: Bool { status.power?.isOn ?? false }
+    var isKeyboardConnected: Bool { remote != nil }
 
     var inputs: [TVInput] { info?.inputs ?? [] }
 
@@ -88,6 +111,7 @@ final class TVController {
     func reconnect() {
         client = nil
         info = nil
+        disconnectRemote()
         connection = .searching
         wakePolling()
     }
@@ -111,6 +135,10 @@ final class TVController {
         do {
             let newStatus = try await client.status()
             if !Task.isCancelled { status = newStatus }
+            if remote == nil, !isConnectingRemote, preferences.keyboardPaired || !hasProbedKeyboard {
+                hasProbedKeyboard = true
+                Task { await connectRemote() }
+            }
         } catch {
             log.error("Status failed: \(error.localizedDescription, privacy: .public)")
             self.client = nil
@@ -261,6 +289,109 @@ final class TVController {
                 NSPasteboard.general.writeObjects([image])
             }
         }
+    }
+
+    // MARK: Keyboard
+
+    func setTVText(_ text: String) {
+        remote?.setText(text)
+    }
+
+    func submitTVText() {
+        remote?.press(RemoteSession.enterKey)
+    }
+
+    func startKeyboardPairing() {
+        guard let host = info?.ipAddress else {
+            keyboardError = "The TV's network address is not known yet. Connect to the TV first."
+            return
+        }
+        keyboardError = nil
+        keyboardPairing = .starting
+        Task {
+            do {
+                let pairing = RemotePairing(host: host, identity: try await loadRemoteIdentity(), clientName: "TV Companion")
+                self.pairing = pairing
+                try await pairing.start()
+                keyboardPairing = .waitingForCode
+            } catch {
+                failPairing(error)
+            }
+        }
+    }
+
+    func finishKeyboardPairing(code: String) {
+        guard let pairing else { return }
+        keyboardError = nil
+        keyboardPairing = .finishing
+        Task {
+            do {
+                try await pairing.finish(code: code.trimmingCharacters(in: .whitespaces))
+                self.pairing = nil
+                keyboardPairing = .idle
+                preferences.keyboardPaired = true
+                await connectRemote()
+            } catch RemoteError.invalidCode where self.pairing != nil {
+                keyboardError = RemoteError.invalidCode.localizedDescription
+                keyboardPairing = .waitingForCode
+            } catch {
+                failPairing(error)
+            }
+        }
+    }
+
+    func cancelKeyboardPairing() {
+        pairing?.cancel()
+        pairing = nil
+        keyboardPairing = .idle
+    }
+
+    func unpairKeyboard() {
+        preferences.keyboardPaired = false
+        disconnectRemote()
+        remoteIdentity = nil
+        try? FileManager.default.removeItem(at: Self.remoteDirectory)
+    }
+
+    private func failPairing(_ error: Error) {
+        pairing?.cancel()
+        pairing = nil
+        keyboardPairing = .idle
+        keyboardError = error.localizedDescription
+    }
+
+    private func connectRemote() async {
+        guard let host = info?.ipAddress, !isConnectingRemote else { return }
+        guard preferences.keyboardPaired || FileManager.default.fileExists(atPath: Self.remoteDirectory.appending(path: "identity.p12").path) else { return }
+        isConnectingRemote = true
+        defer { isConnectingRemote = false }
+        do {
+            let session = RemoteSession(host: host, identity: try await loadRemoteIdentity())
+            session.onTextField = { [weak self] in self?.tvTextField = $0 }
+            session.onClose = { [weak self, weak session] in
+                guard let self, let session, self.remote === session else { return }
+                self.remote = nil
+                self.tvTextField = nil
+            }
+            try await session.connect()
+            remote = session
+            preferences.keyboardPaired = true
+        } catch {
+            log.error("Keyboard connection failed: \(error.localizedDescription, privacy: .public)")
+        }
+    }
+
+    private func disconnectRemote() {
+        remote?.close()
+        remote = nil
+        tvTextField = nil
+    }
+
+    private func loadRemoteIdentity() async throws -> RemoteIdentity {
+        if let remoteIdentity { return remoteIdentity }
+        let identity = try await RemoteIdentity.loadOrCreate(in: Self.remoteDirectory)
+        remoteIdentity = identity
+        return identity
     }
 
     func clearError() {

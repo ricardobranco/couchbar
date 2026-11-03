@@ -20,13 +20,15 @@ public struct TVInfo: Sendable, Equatable {
     public var name: String
     public var serialNumber: String
     public var macAddress: String?
+    public var ipAddress: String?
     public var inputs: [TVInput]
     public var apps: [TVApp]
 
-    public init(name: String, serialNumber: String, macAddress: String?, inputs: [TVInput], apps: [TVApp]) {
+    public init(name: String, serialNumber: String, macAddress: String?, ipAddress: String?, inputs: [TVInput], apps: [TVApp]) {
         self.name = name
         self.serialNumber = serialNumber
         self.macAddress = macAddress
+        self.ipAddress = ipAddress
         self.inputs = inputs
         self.apps = apps
     }
@@ -60,9 +62,10 @@ public struct TVClient: Sendable {
             "ip -o link",
             "dumpsys tv_input",
             "cmd package query-activities --brief -a android.intent.action.MAIN -c android.intent.category.LEANBACK_LAUNCHER",
+            "ip -o -4 addr",
         ].joined(separator: "; echo \(Self.separator); "), timeout: 15)
             .components(separatedBy: Self.separator)
-        guard sections.count == 5 else { throw ADBError.commandFailed("Unexpected answer from the TV.") }
+        guard sections.count == 6 else { throw ADBError.commandFailed("Unexpected answer from the TV.") }
 
         let name = sections[0].trimmingCharacters(in: .whitespacesAndNewlines)
         let packages = Set(sections[4].matches(of: /^\s*([\w.]+)\//.anchorsMatchLineEndings()).map { String($0.1) })
@@ -70,6 +73,7 @@ public struct TVClient: Sendable {
             name: name.isEmpty || name == "null" ? "TV" : name,
             serialNumber: sections[1].trimmingCharacters(in: .whitespacesAndNewlines),
             macAddress: MACAddress.parse(sections[2]),
+            ipAddress: IPAddress.parse(sections[5]),
             inputs: TVInput.parse(sections[3]),
             apps: packages.filter(TVApp.isUserFacing).map(TVApp.init).sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
         )

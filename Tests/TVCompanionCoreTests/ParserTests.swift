@@ -44,6 +44,15 @@ struct ParserTests {
         #expect(VolumeControl.parse("Can't find service: hdmi_control") == .absolute)
     }
 
+    @Test func ipAddress() {
+        let output = """
+        1: lo    inet 127.0.0.1/8 scope host lo\\       valid_lft forever preferred_lft forever
+        16: wlan0    inet 192.168.0.42/24 brd 192.168.0.255 scope global wlan0\\       valid_lft forever preferred_lft forever
+        """
+        #expect(IPAddress.parse(output) == "192.168.0.42")
+        #expect(IPAddress.parse("1: lo    inet 127.0.0.1/8 scope host lo") == nil)
+    }
+
     @Test func powerAndForegroundApp() {
         #expect(PowerState.parse("  mWakefulness=Awake\n") == .awake)
         #expect(PowerState.parse("  mWakefulness=Asleep\n")?.isOn == false)

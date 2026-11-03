@@ -8,6 +8,7 @@ enum PreviewData {
         name: "Living room TV",
         serialNumber: "1A2B3C4D5E6F7A8B9",
         macAddress: "02:11:22:33:44:55",
+        ipAddress: "192.168.0.42",
         inputs: [
             TVInput(id: "tuner", kind: .tuner, state: .connected),
             TVInput(id: "hdmi1", kind: .hdmi(port: 1), state: .standby),
@@ -61,6 +62,7 @@ enum PreviewRenderer {
                 render(PopupView().environment(scenario.controller), name: "popup-\(scenario.name)", in: directory)
             }
             render(SettingsView().environment(PreviewData.scenarios[0].controller), name: "settings", in: directory)
+            render(PairingCodeSheet().environment(PreviewData.scenarios[0].controller), name: "pairing", in: directory)
             exit(0)
         }
     }
