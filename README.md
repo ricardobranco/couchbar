@@ -1,60 +1,176 @@
 # TV Companion
 
-A macOS menu bar companion for an Android TV / Google TV, built for the TCL 55C845X2 (Google TV 14).
-It talks to the TV over wireless ADB and mirrors the TV screen to the Mac with [scrcpy](https://github.com/Genymobile/scrcpy).
+A macOS menu bar app for an Android TV or Google TV. Turn the TV on and off, control volume and playback, type
+on the TV from the Mac keyboard, switch inputs, launch apps and mirror the TV screen to a Mac window, all from
+the menu bar.
+
+It talks to the TV over wireless ADB and the Android TV Remote protocol, and mirrors the screen with
+[scrcpy](https://github.com/Genymobile/scrcpy). Everything stays on your local network: no account, no cloud
+service, no telemetry.
 
 <p>
-  <img src="docs/previews/popup-connected-light.png" width="300" alt="Menu bar popup, light mode">
-  <img src="docs/previews/popup-connected-dark.png" width="300" alt="Menu bar popup, dark mode">
+  <img src="docs/previews/popup-connected-light.png" width="280" alt="Menu bar popup, light mode">
+  <img src="docs/previews/popup-mirroring-dark.png" width="280" alt="Menu bar popup while mirroring, dark mode">
 </p>
 
 ## Features
 
 | Where | What |
 |---|---|
-| Menu bar popup | Power (sleep / wake, Wake-on-LAN when offline), TV screen mirroring, TV screenshot to Desktop and clipboard, volume and mute, now playing with transport controls, D-pad remote with keyboard arrows, a keyboard that follows the TV's selected text field (like Google Home), input switching (Live TV, HDMI 1–4), favorite apps with their own Android TV banners |
-| Mirror window | scrcpy window with the TV screen; the Mac keyboard and mouse control the TV, optional TV sound on the Mac |
-| Settings | Connection (auto-discovered or manual address), keyboard pairing, adb and scrcpy paths, mirroring quality, input names, favorite apps, launch at login |
+| Menu bar popup | Power (sleep and wake, Wake-on-LAN when the TV is off the network), volume and mute, now playing with transport controls, D-pad remote that also follows the Mac's arrow keys, a keyboard that edits the TV's selected text field live, input switching (Live TV, HDMI 1–4), favorite apps with the banners they show on the TV |
+| Mirroring | The TV screen in a scrcpy window. The Mac keyboard and mouse control the TV, optionally with the TV's sound on the Mac. The popup shows a live preview and the menu bar icon turns blue while mirroring. |
+| Screenshots | One click saves a TV screenshot to the Desktop and copies it to the clipboard |
+| Settings | Connection (found automatically, or a manual address), keyboard pairing, adb and scrcpy paths, mirroring quality, input names, favorite apps, launch at login |
 
-Volume is a slider when the TV can set an exact level: its own speakers, or a soundbar with CEC absolute volume.
-A soundbar that only takes CEC volume keys gets − / + buttons and the level it reports.
+**Volume.** With the TV's own speakers, or a soundbar that supports CEC absolute volume, you get a slider. A
+soundbar that only accepts CEC volume keys gets − / + buttons plus the level it reports.
 
-The keyboard uses the Android TV Remote protocol, as the Google Home app does: pair once in Settings with the
-code the TV shows. Typing then edits the TV's selected text field live, accents included. Unpaired, text is
-sent over adb.
+**Keyboard.** The keyboard uses the Android TV Remote protocol, as the Google Home app does. Pair once in Settings
+by entering the code the TV shows; after that, typing edits the selected text field on the TV, accents
+included. Until it is paired, text is sent over adb.
 
-HDMI inputs, Live TV and DRM-protected apps (Netflix and similar) mirror as black: Android can't capture
-hardware video planes or secure surfaces. The Google TV UI and regular apps mirror normally.
+**Mirroring limits.** HDMI inputs, Live TV and DRM-protected apps (Netflix and similar) mirror as a black screen,
+because Android doesn't capture hardware video layers or protected content. The Google TV home screen and
+regular apps mirror normally.
+
+<p>
+  <img src="docs/previews/settings-light.png" width="420" alt="Settings window">
+  <img src="docs/previews/pairing-light.png" width="300" alt="Keyboard pairing dialog">
+</p>
+
+## Compatibility
+
+Built and tested with a TCL 55C845X2 on Google TV 14. Other Android TV and Google TV sets on Android 11 or
+later (the first version with wireless debugging) should work: the app uses standard Android commands. Only the
+Live TV shortcut and its detection are specific to TCL.
 
 ## Requirements
 
-- macOS 14 or later, Apple silicon
-- Android platform-tools (`adb`) and scrcpy: `brew install scrcpy android-platform-tools`
-- Optional: Android SDK build-tools (`aapt2`), to read each app's name and banner from the TV. Without it apps
-  show a symbol.
-- The TV on the same network with Wireless debugging on (Settings → System → Developer options),
-  paired once with `adb pair <ip>:<port>`. The TV is then found by mDNS and remembered by its serial number.
+| What | Version or source |
+|---|---|
+| Mac | macOS 14 Sonoma or later. Developed on Apple silicon. |
+| To build | Xcode 16 or later (Swift 6) |
+| adb and scrcpy | `brew install android-platform-tools scrcpy` |
+| aapt2 (optional) | Android SDK build-tools, for example from Android Studio's SDK Manager. It reads each app's name and banner from the TV; without it, apps show a symbol. |
 
-## Build
+The app looks for its tools here, and both paths can also be set in Settings:
+
+| Tool | Searched in |
+|---|---|
+| adb | `$ADB`, `$ANDROID_HOME/platform-tools`, `$ANDROID_SDK_ROOT/platform-tools`, `~/Library/Android/sdk/platform-tools`, `/opt/homebrew/bin`, `/usr/local/bin` |
+| scrcpy | `/opt/homebrew/bin`, `/usr/local/bin` |
+| aapt2 | The newest `build-tools/<version>` in the SDK next to adb, `$ANDROID_HOME`, `$ANDROID_SDK_ROOT` or `~/Library/Android/sdk` |
+
+## Build and install
 
 ```bash
-make test   # unit tests
-make run    # builds build/TV Companion.app and opens it
-make install  # copies the app to /Applications
+git clone https://github.com/ricardobranco/tv-companion.git
+cd tv-companion
+make install
 ```
 
-`scripts/build-app.sh` signs with the Apple Development identity of `TEAM_ID` (or `SIGN_IDENTITY`), and falls
-back to an ad-hoc signature. Open `Package.swift` in Xcode for SwiftUI previews of the popup and Settings.
+| Command | What it does |
+|---|---|
+| `make build` | Debug build with SwiftPM |
+| `make test` | Unit tests |
+| `make app` | Builds a release `build/TV Companion.app` |
+| `make run` | Builds the app and opens it |
+| `make install` | Builds the app and copies it to `/Applications` |
+| `make clean` | Removes the build folders |
 
-Read-only checks against a real TV: `TV_LIVE_TESTS=1 swift test --filter LiveTVTests`.
+`scripts/build-app.sh` signs the app with an Apple Development certificate for the team in `TEAM_ID`. If no
+matching certificate is found, it signs ad hoc. Ad hoc works on your own Mac. To sign with your own team or a
+specific identity:
 
-Preview images: `swift build && .build/debug/TVCompanion --render-previews docs/previews`.
+```bash
+TEAM_ID=YOURTEAMID make install
+```
 
-## Layout
+```bash
+SIGN_IDENTITY="Apple Development: Your Name (XXXXXXXXXX)" make install
+```
+
+Keep the same signature between builds: macOS ties the Local Network permission to the app's signature, and
+asks again when it changes.
+
+## Set up the TV
+
+1. On the TV, turn on Developer options: Settings → System → About, then select **Android TV OS build** seven
+   times.
+2. In Settings → System → Developer options, turn on **Wireless debugging**. Select it, then **Pair device with
+   pairing code**.
+3. On the Mac, pair once with the address and code the TV shows:
+
+   ```bash
+   adb pair 192.168.1.20:37000
+   ```
+
+4. Open TV Companion. When macOS asks to let it find devices on your local network, select **Allow**. The TV is
+   then found automatically and remembered by its serial number, even when its IP address changes.
+5. Optional: in Settings → Connection → Keyboard, select **Pair…** and enter the code shown on the TV.
+
+## Troubleshooting
+
+| Problem | What to check |
+|---|---|
+| "No TV found" | Wireless debugging is on and the TV is on the same network as the Mac. In System Settings → Privacy & Security → Local Network, TV Companion is allowed. |
+| "No TV found" while Android Studio is open | All apps share one adb server, and macOS applies the Local Network permission of the app that started it. Quit Android Studio, run `adb kill-server`, and reopen TV Companion. Or allow Android Studio in Local Network too. |
+| The mirror window is black | The TV is showing HDMI, Live TV or a DRM-protected app (see Mirroring limits above). |
+| The keyboard doesn't type | In Settings, unpair the keyboard and pair it again. |
+| scrcpy errors | `~/Library/Logs/TV Companion/scrcpy.log` |
+
+## Your data
+
+| What | Where |
+|---|---|
+| Settings | The app's user defaults (`dev.ricardobranco.tvcompanion`) |
+| Keyboard pairing certificate | `~/Library/Application Support/TV Companion/remote` (Unpair deletes it) |
+| App names and banners read from the TV | `~/Library/Caches/TV Companion/apps` |
+| scrcpy log | `~/Library/Logs/TV Companion/scrcpy.log` |
+
+## Development
+
+Open `Package.swift` in Xcode for SwiftUI previews of the popup and Settings.
+
+| Task | Command |
+|---|---|
+| Read-only checks against a real TV | `TV_LIVE_TESTS=1 swift test --filter LiveTVTests` |
+| Re-render the images in this README | `swift build && .build/debug/TVCompanion --render-previews docs/previews --artwork ~/Library/Caches/TV\ Companion/apps` |
+
+The images use the sample data in `Sources/TVCompanion/Previews.swift`, not a live TV. `--artwork` adds the app banners the app has cached from your TV; leave it
+out to show symbols instead.
 
 | Path | Contents |
 |---|---|
-| `Sources/TVCompanionCore` | adb process runner, device discovery, TV client, dumpsys parsers, scrcpy arguments, Wake-on-LAN |
+| `Sources/TVCompanionCore` | adb process runner, device discovery, TV client, dumpsys parsers, app artwork, scrcpy arguments, Wake-on-LAN |
+| `Sources/TVCompanionCore/Remote` | Android TV Remote protocol v2: TLS client certificate, pairing, keyboard session, protobuf encoding |
 | `Sources/TVCompanion` | SwiftUI menu bar app: controller, scrcpy session, popup and Settings views |
-| `Tests/TVCompanionCoreTests` | Parser tests from real TV output, opt-in live TV test |
+| `Tests/TVCompanionCoreTests` | Parser and protocol tests from real TV output, opt-in live TV tests |
 | `Support/Info.plist` | Bundle metadata (`LSUIElement`: menu bar only, no Dock icon) |
+
+## Credits
+
+TV Companion runs these tools as separate programs; it doesn't include their code.
+
+| Project | Used for | License |
+|---|---|---|
+| [scrcpy](https://github.com/Genymobile/scrcpy) by Genymobile and Romain Vimont | Screen mirroring | Apache 2.0 |
+| [Android SDK Platform-Tools](https://developer.android.com/tools/releases/platform-tools) (adb) and build-tools (aapt2), from the Android Open Source Project | Talking to the TV, reading app names and banners | Apache 2.0 |
+
+The Swift implementation of the Android TV Remote protocol was written using these projects as protocol
+references:
+
+| Project | |
+|---|---|
+| [androidtvremote2](https://github.com/tronikos/androidtvremote2) by tronikos | Python client for protocol v2, Apache 2.0 |
+| [androidtv-remote](https://github.com/louis49/androidtv-remote) by louis49 | Node.js client for protocol v2 |
+| [Aymkdn's protocol notes](https://github.com/Aymkdn/assistant-freebox-cloud/wiki/Google-TV-(aka-Android-TV)-Remote-Control-(v2)) | Description of the v2 messages |
+
+Icons are [SF Symbols](https://developer.apple.com/sf-symbols/) by Apple.
+
+## License
+
+[MIT](LICENSE) © 2026 Ricardo Branco
+
+TV Companion is not affiliated with or endorsed by Google, TCL or Genymobile. Android, Android TV and Google TV are
+trademarks of Google LLC. Other product names are trademarks of their owners.
