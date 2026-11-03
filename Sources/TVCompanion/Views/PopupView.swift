@@ -3,6 +3,7 @@ import TVCompanionCore
 
 struct PopupView: View {
     @Environment(TVController.self) private var controller
+    @State private var contentHeight: CGFloat = 0
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
@@ -35,7 +36,9 @@ struct PopupView: View {
         }
         .padding(16)
         .frame(width: 340)
+        .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { contentHeight = $0 }
         .background(WindowKeyReader { controller.isPopupVisible = $0 })
+        .background(WindowHeightFitter(height: contentHeight))
     }
 }
 
