@@ -156,6 +156,12 @@ out to show symbols instead.
 | `Support` | Bundle metadata (`LSUIElement`: menu bar only, no Dock icon) and the app icon |
 | `scripts` | App bundle build and signing, icon drawing |
 
+## How it was made
+
+Couchbar was built with [Claude Code](https://claude.com/claude-code). Claude wrote most of the code, tests and docs;
+I chose the features, reviewed the changes and tested everything on a TCL Google TV. Commits made with Claude
+carry a `Co-Authored-By` line.
+
 ## Credits
 
 Couchbar runs these tools as separate programs; it doesn't include their code.
