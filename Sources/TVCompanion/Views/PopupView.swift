@@ -108,28 +108,89 @@ private struct MirrorRow: View {
     @Environment(TVController.self) private var controller
 
     var body: some View {
-        HStack(spacing: 8) {
-            Button {
-                controller.toggleMirroring()
-            } label: {
-                Label(
-                    controller.mirror.isRunning ? "Stop Mirroring" : "Mirror TV Screen",
-                    systemImage: controller.mirror.isRunning ? "stop.fill" : "rectangle.on.rectangle"
-                )
-                .frame(maxWidth: .infinity)
+        if controller.mirror.isRunning {
+            MirroringCard()
+        } else {
+            HStack(spacing: 8) {
+                Button {
+                    controller.toggleMirroring()
+                } label: {
+                    Label("Mirror TV Screen", systemImage: "rectangle.on.rectangle")
+                        .frame(maxWidth: .infinity)
+                }
+                .controlSize(.large)
+                .buttonStyle(.borderedProminent)
+                ScreenshotButton()
             }
-            .controlSize(.large)
-            .buttonStyle(.borderedProminent)
-            .tint(controller.mirror.isRunning ? .red : .accentColor)
-
-            Button {
-                controller.saveScreenshot()
-            } label: {
-                Image(systemName: "camera")
-            }
-            .controlSize(.large)
-            .help("Save a TV screenshot to the Desktop and copy it")
         }
+    }
+}
+
+private struct MirroringCard: View {
+    @Environment(TVController.self) private var controller
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            SectionTitle("Currently Mirroring")
+            Button {
+                controller.mirror.bringToFront()
+            } label: {
+                ZStack {
+                    Color.black
+                    if let preview = controller.mirrorPreview {
+                        Image(nsImage: preview)
+                            .resizable()
+                            .scaledToFit()
+                    } else {
+                        ProgressView()
+                            .controlSize(.small)
+                            .colorScheme(.dark)
+                    }
+                }
+                // A fixed height: the menu bar window only grows for content with a definite size, and
+                // squeezes a flexible thumbnail to nothing when mirroring starts while it is open.
+                .frame(maxWidth: .infinity)
+                .frame(height: 162)
+                .clipShape(RoundedRectangle(cornerRadius: 8))
+                .contentShape(RoundedRectangle(cornerRadius: 8))
+            }
+            .buttonStyle(.plain)
+            .help("Show the mirror window")
+
+            HStack(spacing: 8) {
+                Button {
+                    controller.toggleMirroring()
+                } label: {
+                    Text("Stop Mirroring")
+                        .foregroundStyle(.red)
+                        .frame(maxWidth: .infinity)
+                }
+                .controlSize(.large)
+                ScreenshotButton()
+            }
+        }
+        .padding(10)
+        .background(.quinary, in: RoundedRectangle(cornerRadius: 12))
+        .task(id: controller.isPopupVisible) {
+            while controller.isPopupVisible, !Task.isCancelled {
+                await controller.refreshMirrorPreview()
+                try? await Task.sleep(for: .seconds(1))
+            }
+        }
+    }
+}
+
+private struct ScreenshotButton: View {
+    @Environment(TVController.self) private var controller
+
+    var body: some View {
+        Button {
+            controller.saveScreenshot()
+        } label: {
+            Image(systemName: "camera")
+        }
+        .controlSize(.large)
+        .help("Save a TV screenshot to the Desktop and copy it")
     }
 }
 

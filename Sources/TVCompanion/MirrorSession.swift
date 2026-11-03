@@ -70,6 +70,11 @@ final class MirrorSession {
         }
     }
 
+    func bringToFront() {
+        guard let process else { return }
+        NSRunningApplication(processIdentifier: process.processIdentifier)?.activate()
+    }
+
     private func finished(status: Int32, reason: Process.TerminationReason) {
         process = nil
         isRunning = false

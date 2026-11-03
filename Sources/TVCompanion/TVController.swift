@@ -19,6 +19,7 @@ final class TVController {
     private(set) var info: TVInfo?
     private(set) var status = TVStatus()
     private(set) var lastError: String?
+    private(set) var mirrorPreview: NSImage?
     var isPopupVisible = false {
         didSet { if isPopupVisible && !oldValue { wakePolling() } }
     }
@@ -33,13 +34,14 @@ final class TVController {
     }
 
     #if DEBUG
-    static func preview(connection: Connection = .connected, info: TVInfo?, status: TVStatus = TVStatus(), mirroring: Bool = false, error: String? = nil) -> TVController {
+    static func preview(connection: Connection = .connected, info: TVInfo?, status: TVStatus = TVStatus(), mirroring: Bool = false, mirrorPreview: NSImage? = nil, error: String? = nil) -> TVController {
         let controller = TVController(autoStart: false)
         controller.connection = connection
         controller.info = info
         controller.status = status
         controller.lastError = error
         if mirroring { controller.mirror.simulateRunning() }
+        controller.mirrorPreview = mirrorPreview
         return controller
     }
     #endif
@@ -200,7 +202,13 @@ final class TVController {
             lastError = "scrcpy was not found. Install it with `brew install scrcpy` or set its path in Settings."
             return
         }
+        mirrorPreview = nil
         mirror.start(scrcpy: scrcpy, adb: client.adb, serial: client.serial, title: tvName, options: preferences.mirror)
+    }
+
+    func refreshMirrorPreview() async {
+        guard let client, let data = try? await client.screenshot() else { return }
+        mirrorPreview = NSImage(data: data)
     }
 
     func saveScreenshot() {

@@ -26,10 +26,20 @@ enum PreviewData {
         nowPlaying: NowPlaying(package: "com.spotify.tv.android", title: "Take It Or Leave It", artist: "The Strokes", isPlaying: true)
     )
 
+    @MainActor static let homeScreen = NSImage(size: NSSize(width: 1920, height: 1080), flipped: false) { rect in
+        NSGradient(colors: [NSColor(red: 0.3, green: 0.06, blue: 0.05, alpha: 1), .black])?.draw(in: rect, angle: -90)
+        for (index, color) in [NSColor.systemRed, .white, .systemIndigo, .systemPurple, .systemGreen].enumerated() {
+            color.setFill()
+            NSBezierPath(roundedRect: NSRect(x: 150 + CGFloat(index) * 330, y: 360, width: 300, height: 170), xRadius: 18, yRadius: 18).fill()
+        }
+        return true
+    }
+
     @MainActor static var scenarios: [(name: String, controller: TVController)] {
         [
             ("connected", .preview(info: info, status: playing)),
-            ("mirroring", .preview(info: info, status: TVStatus(power: .awake, volume: VolumeLevel(current: 22, range: 0...100), foregroundPackage: "com.google.android.youtube.tv"), mirroring: true)),
+            ("mirroring", .preview(info: info, status: TVStatus(power: .awake, volume: VolumeLevel(current: 22, range: 0...100), foregroundPackage: "com.google.android.youtube.tv"), mirroring: true, mirrorPreview: homeScreen)),
+            ("mirroring-loading", .preview(info: info, status: TVStatus(power: .awake), mirroring: true)),
             ("disconnected", .preview(connection: .unavailable("No TV found. Check that wireless debugging is on and the Mac is on the same network."), info: nil)),
         ]
     }
